@@ -2,24 +2,24 @@
 // http://localhost:3000/isolated/exercise/02.js
 
 import * as React from 'react'
+import useStateWithPersistentLocalStorage from './02_custom_hook'
 
-function Greeting({initialName = ''}) {
-  // 🐨 initialize the state to the value from localStorage
-  // 💰 window.localStorage.getItem('name') || initialName
-  const [name, setName] = React.useState(initialName)
+function PersistentGreeting({initialNameIfNoStorageValue = ''}) {
+  const [name, setName] = useStateWithPersistentLocalStorage(
+    initialNameIfNoStorageValue,
+    'name',
+  )
 
-  // 🐨 Here's where you'll use `React.useEffect`.
-  // The callback should set the `name` in localStorage.
-  // 💰 window.localStorage.setItem('name', name)
-
-  function handleChange(event) {
-    setName(event.target.value)
+  function onInputChange(event) {
+    const inputTextValue = event.target.value
+    setName(inputTextValue)
   }
+
   return (
     <div>
       <form>
         <label htmlFor="name">Name: </label>
-        <input value={name} onChange={handleChange} id="name" />
+        <input value={name} onChange={onInputChange} id="name" />
       </form>
       {name ? <strong>Hello {name}</strong> : 'Please type your name'}
     </div>
@@ -27,7 +27,7 @@ function Greeting({initialName = ''}) {
 }
 
 function App() {
-  return <Greeting />
+  return <PersistentGreeting initialNameIfNoStorageValue="" />
 }
 
 export default App
