@@ -2,7 +2,7 @@
 // http://localhost:3000/isolated/exercise/02.js
 
 import * as React from 'react'
-import useStateWithPersistentLocalStorage from './02_custom_hook'
+import useStateWithPersistentLocalStorage from '../personal_code/02_exercise/02_custom_hook'
 
 function PersistentGreeting({initialNameIfNoStorageValue = ''}) {
   const [name, setName] = useStateWithPersistentLocalStorage(
