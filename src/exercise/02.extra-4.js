@@ -4,14 +4,21 @@
 import * as React from 'react'
 import useStateWithPersistentLocalStorage from './02_custom_hook'
 
-function LogValue({initialValueIfNoStorageValue = ''}) {
+function LogValue({initialValueIfNoStorageValue}) {
   const [value, setValue] = useStateWithPersistentLocalStorage(
     initialValueIfNoStorageValue,
-    'name',
+    'myValue',
   )
 
   function onButtonClick() {
     console.log('button clicked')
+    // Immutably change object in some way
+    setValue(value => {
+      return {
+        ...value,
+        count: value.count + 1,
+      }
+    })
   }
 
   const valueString =
@@ -19,15 +26,28 @@ function LogValue({initialValueIfNoStorageValue = ''}) {
       ? JSON.stringify(value, undefined, 2)
       : 'value is null or undefined'
   return (
-    <div>
+    <div style={styles.container}>
       <strong>value: {valueString}</strong>
-      <button onClick={onButtonClick}></button>
+      <button onClick={onButtonClick}>Click Me</button>
     </div>
   )
 }
 
 function App() {
-  return <LogValue initialValueIfNoStorageValue={''} />
+  const countObject = {
+    count: 0,
+  }
+  return <LogValue initialValueIfNoStorageValue={countObject} />
+}
+
+const styles = {
+  container: {
+    display: 'flex',
+    height: '100vh',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
 }
 
 export default App
