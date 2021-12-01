@@ -2,14 +2,22 @@
 // http://localhost:3000/isolated/exercise/06.js
 
 import * as React from 'react'
+import {useState, useEffect} from 'react'
 // 🐨 you'll want the following additional things from '../pokemon':
 // fetchPokemon: the function we call to get the pokemon info
 // PokemonInfoFallback: the thing we show while we're loading the pokemon info
 // PokemonDataView: the stuff we use to display the pokemon info
-import {PokemonForm} from '../pokemon'
+import {
+  PokemonForm,
+  fetchPokemon,
+  PokemonInfoFallback,
+  PokemonDataView,
+} from '../pokemon'
 
 function PokemonInfo({pokemonName}) {
   // 🐨 Have state for the pokemon (null)
+  const [pokemon, setPokemon] = useState(null)
+
   // 🐨 use React.useEffect where the callback should be called whenever the
   // pokemon name changes.
   // 💰 DON'T FORGET THE DEPENDENCIES ARRAY!
@@ -19,13 +27,38 @@ function PokemonInfo({pokemonName}) {
   //   fetchPokemon('Pikachu').then(
   //     pokemonData => {/* update all the state here */},
   //   )
+  useEffect(() => {
+    // Fetch for pokemon data object, set pokemon to be null in the meantime,
+    // and then if we get a result set that object as state
+    async function fetchAndUpdatePokemon() {
+      if (!isNonEmptyString(pokemonName)) return
+
+      try {
+        setPokemon(null)
+        const fetchedPokemon = await fetchPokemon(pokemonName)
+
+        setPokemon(fetchedPokemon)
+      } catch (error) {
+        console.error('Error while fetching pokemon. Error:', error)
+      }
+    }
+    fetchAndUpdatePokemon()
+  }, [pokemonName])
+
+  function isNonEmptyString(value) {
+    return typeof value === 'string' && value.length > 0
+  }
+
   // 🐨 return the following things based on the `pokemon` state and `pokemonName` prop:
   //   1. no pokemonName: 'Submit a pokemon'
   //   2. pokemonName but no pokemon: <PokemonInfoFallback name={pokemonName} />
   //   3. pokemon: <PokemonDataView pokemon={pokemon} />
-
-  // 💣 remove this
-  return 'TODO'
+  if (!isNonEmptyString(pokemonName)) {
+    return <p>Submit a pokemon</p>
+  } else if (!pokemon) {
+    return <PokemonInfoFallback name={pokemonName} />
+  }
+  return <PokemonDataView pokemon={pokemon} />
 }
 
 function App() {
