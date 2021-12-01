@@ -17,6 +17,7 @@ import {
 function PokemonInfo({pokemonName}) {
   // 🐨 Have state for the pokemon (null)
   const [pokemon, setPokemon] = useState(null)
+  const [error, setError] = useState(null)
 
   // 🐨 use React.useEffect where the callback should be called whenever the
   // pokemon name changes.
@@ -34,12 +35,20 @@ function PokemonInfo({pokemonName}) {
       if (!isNonEmptyString(pokemonName)) return
 
       try {
+        // Emulate the fact that we're now in the 'pending' state
+        setError(null)
         setPokemon(null)
         const fetchedPokemon = await fetchPokemon(pokemonName)
 
+        // Emulate the fact that we're now in the 'resolved' state
+        setError(null)
         setPokemon(fetchedPokemon)
-      } catch (error) {
-        console.error('Error while fetching pokemon. Error:', error)
+      } catch (e) {
+        console.error('Error while fetching pokemon. Error:', e)
+
+        // Emulate the fact that we're now in the 'error' state
+        setError(e)
+        setPokemon(null)
       }
     }
     fetchAndUpdatePokemon()
@@ -55,6 +64,13 @@ function PokemonInfo({pokemonName}) {
   //   3. pokemon: <PokemonDataView pokemon={pokemon} />
   if (!isNonEmptyString(pokemonName)) {
     return <p>Submit a pokemon</p>
+  } else if (error) {
+    return (
+      <div role="alert">
+        There was an error:{' '}
+        <pre style={{whiteSpace: 'normal'}}>{error.message}</pre>
+      </div>
+    )
   } else if (!pokemon) {
     return <PokemonInfoFallback name={pokemonName} />
   }
