@@ -14,8 +14,12 @@ import {
   PokemonDataView,
 } from '../pokemon'
 
+const IDLE = 'idle'
+const PENDING = 'pending'
+const RESOLVED = 'resolved'
+const REJECTED = 'rejected'
 function PokemonInfo({pokemonName}) {
-  // 🐨 Have state for the pokemon (null)
+  const [status, setStatus] = useState(IDLE)
   const [pokemon, setPokemon] = useState(null)
   const [error, setError] = useState(null)
 
@@ -29,26 +33,24 @@ function PokemonInfo({pokemonName}) {
   //     pokemonData => {/* update all the state here */},
   //   )
   useEffect(() => {
-    // Fetch for pokemon data object, set pokemon to be null in the meantime,
-    // and then if we get a result set that object as state
+    // Fetch for pokemon data object
     async function fetchAndUpdatePokemon() {
-      if (!isNonEmptyString(pokemonName)) return
+      if (!isNonEmptyString(pokemonName)) {
+        setStatus(IDLE)
+        return
+      }
 
       try {
-        // Emulate the fact that we're now in the 'pending' state
-        setError(null)
-        setPokemon(null)
+        setStatus(PENDING)
         const fetchedPokemon = await fetchPokemon(pokemonName)
 
-        // Emulate the fact that we're now in the 'resolved' state
-        setError(null)
         setPokemon(fetchedPokemon)
+        setStatus(RESOLVED)
       } catch (e) {
         console.error('Error while fetching pokemon. Error:', e)
 
-        // Emulate the fact that we're now in the 'error' state
         setError(e)
-        setPokemon(null)
+        setStatus(REJECTED)
       }
     }
     fetchAndUpdatePokemon()
@@ -62,18 +64,19 @@ function PokemonInfo({pokemonName}) {
   //   1. no pokemonName: 'Submit a pokemon'
   //   2. pokemonName but no pokemon: <PokemonInfoFallback name={pokemonName} />
   //   3. pokemon: <PokemonDataView pokemon={pokemon} />
-  if (!isNonEmptyString(pokemonName)) {
+  if (status === IDLE) {
     return <p>Submit a pokemon</p>
-  } else if (error) {
+  } else if (status === REJECTED) {
     return (
       <div role="alert">
         There was an error:{' '}
         <pre style={{whiteSpace: 'normal'}}>{error.message}</pre>
       </div>
     )
-  } else if (!pokemon) {
+  } else if (status === PENDING) {
     return <PokemonInfoFallback name={pokemonName} />
   }
+  // Should happen when status === RESOLVED
   return <PokemonDataView pokemon={pokemon} />
 }
 
