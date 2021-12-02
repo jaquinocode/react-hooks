@@ -82,9 +82,13 @@ function PokemonInfo({pokemonName}) {
     )
   } else if (status === PENDING) {
     return <PokemonInfoFallback name={pokemonName} />
+  } else if (status === RESOLVED) {
+    return <PokemonDataView pokemon={pokemon} />
   }
-  // Should happen when status is set to RESOLVED
-  return <PokemonDataView pokemon={pokemon} />
+
+  throw new Error(
+    "In PokemonInfo component: We've reached a part of the code that should be impossible to reach. For some reason, none of the conditions that lead to returning JSX were satisfied.",
+  )
 }
 
 function App() {
