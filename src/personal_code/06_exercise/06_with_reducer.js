@@ -2,7 +2,7 @@
 // http://localhost:3000/isolated/exercise/06.js
 
 import * as React from 'react'
-import {useState, useEffect} from 'react'
+import {useState, useEffect, useReducer} from 'react'
 // 🐨 you'll want the following additional things from '../pokemon':
 // fetchPokemon: the function we call to get the pokemon info
 // PokemonInfoFallback: the thing we show while we're loading the pokemon info
@@ -12,60 +12,78 @@ import {
   fetchPokemon,
   PokemonInfoFallback,
   PokemonDataView,
-} from '../pokemon'
+} from '../../pokemon'
 
 const IDLE = 'idle'
 const PENDING = 'pending'
 const RESOLVED = 'resolved'
 const REJECTED = 'rejected'
+
+const SET_TO_IDLE = 'SET_TO_IDLE'
+const SET_TO_PENDING = 'SET_TO_PENDING'
+const SET_TO_RESOLVED = 'SET_TO_RESOLVED'
+const SET_TO_REJECTED = 'SET_TO_REJECTED'
+
+function reducer(state, action) {
+  switch (action.type) {
+    case SET_TO_IDLE:
+      return {
+        ...state,
+        status: IDLE,
+        pokemon: null,
+        error: null,
+      }
+    case SET_TO_PENDING:
+      return {
+        ...state,
+        status: PENDING,
+        pokemon: null,
+        error: null,
+      }
+    case SET_TO_RESOLVED:
+      return {
+        ...state,
+        status: RESOLVED,
+        pokemon: action.payload,
+        error: null,
+      }
+    case SET_TO_REJECTED:
+      return {
+        ...state,
+        status: REJECTED,
+        pokemon: null,
+        error: action.payload,
+      }
+    default:
+      throw new Error('Incorrect action type for PokemonInfo reducer.')
+  }
+}
+
 function PokemonInfo({pokemonName}) {
-  const [state, setState] = useState({
+  const [state, dispatch] = useReducer(reducer, {
     status: IDLE,
     pokemon: null,
     error: null,
   })
   const {status, pokemon, error} = state
 
-  // 🐨 use React.useEffect where the callback should be called whenever the
-  // pokemon name changes.
-  // 💰 DON'T FORGET THE DEPENDENCIES ARRAY!
-  // 💰 if the pokemonName is falsy (an empty string) then don't bother making the request (exit early).
-  // 🐨 before calling `fetchPokemon`, clear the current pokemon state by setting it to null
-  // 💰 Use the `fetchPokemon` function to fetch a pokemon by its name:
-  //   fetchPokemon('Pikachu').then(
-  //     pokemonData => {/* update all the state here */},
-  //   )
   useEffect(() => {
     // Fetch for pokemon data object
     async function fetchAndUpdatePokemon() {
       if (!isNonEmptyString(pokemonName)) {
-        setState(state => ({
-          ...state,
-          status: IDLE,
-        }))
+        dispatch({type: SET_TO_IDLE})
         return
       }
 
       try {
-        setState(state => ({
-          ...state,
-          status: PENDING,
-        }))
+        dispatch({type: SET_TO_PENDING})
         const fetchedPokemon = await fetchPokemon(pokemonName)
 
-        setState(state => ({
-          ...state,
-          status: RESOLVED,
-          pokemon: fetchedPokemon,
-        }))
+        dispatch({type: SET_TO_RESOLVED, payload: fetchedPokemon})
       } catch (e) {
         console.error('Error while fetching pokemon. Error:', e)
 
-        setState(state => ({
-          ...state,
-          status: REJECTED,
-          error: e,
-        }))
+        dispatch({type: SET_TO_REJECTED, payload: e})
       }
     }
     fetchAndUpdatePokemon()
@@ -75,10 +93,6 @@ function PokemonInfo({pokemonName}) {
     return typeof value === 'string' && value.length > 0
   }
 
-  // 🐨 return the following things based on the `pokemon` state and `pokemonName` prop:
-  //   1. no pokemonName: 'Submit a pokemon'
-  //   2. pokemonName but no pokemon: <PokemonInfoFallback name={pokemonName} />
-  //   3. pokemon: <PokemonDataView pokemon={pokemon} />
   if (status === IDLE) {
     return <p>Submit a pokemon</p>
   } else if (status === REJECTED) {
@@ -91,7 +105,7 @@ function PokemonInfo({pokemonName}) {
   } else if (status === PENDING) {
     return <PokemonInfoFallback name={pokemonName} />
   }
-  // Should happen when status is set to RESOLVED
+  // Will happen when status is set to RESOLVED
   return <PokemonDataView pokemon={pokemon} />
 }
 

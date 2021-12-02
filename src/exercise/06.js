@@ -13,6 +13,7 @@ import {
   PokemonInfoFallback,
   PokemonDataView,
 } from '../pokemon'
+// import AppWithReducer from '../personal_code/06_exercise/06_with_reducer'
 
 const IDLE = 'idle'
 const PENDING = 'pending'
@@ -26,15 +27,6 @@ function PokemonInfo({pokemonName}) {
   })
   const {status, pokemon, error} = state
 
-  // 🐨 use React.useEffect where the callback should be called whenever the
-  // pokemon name changes.
-  // 💰 DON'T FORGET THE DEPENDENCIES ARRAY!
-  // 💰 if the pokemonName is falsy (an empty string) then don't bother making the request (exit early).
-  // 🐨 before calling `fetchPokemon`, clear the current pokemon state by setting it to null
-  // 💰 Use the `fetchPokemon` function to fetch a pokemon by its name:
-  //   fetchPokemon('Pikachu').then(
-  //     pokemonData => {/* update all the state here */},
-  //   )
   useEffect(() => {
     // Fetch for pokemon data object
     async function fetchAndUpdatePokemon() {
@@ -114,3 +106,4 @@ function App() {
 }
 
 export default App
+// export default AppWithReducer
