@@ -2,7 +2,7 @@
 // http://localhost:3000/isolated/exercise/06.js
 
 import * as React from 'react'
-import {useState, useEffect, useReducer} from 'react'
+import {useEffect, useReducer} from 'react'
 // 🐨 you'll want the following additional things from '../pokemon':
 // fetchPokemon: the function we call to get the pokemon info
 // PokemonInfoFallback: the thing we show while we're loading the pokemon info
@@ -44,7 +44,7 @@ function reducer(state, action) {
       return {
         ...state,
         status: RESOLVED,
-        pokemon: action.payload,
+        pokemon: action.pokemon,
         error: null,
       }
     case SET_TO_REJECTED:
@@ -52,7 +52,7 @@ function reducer(state, action) {
         ...state,
         status: REJECTED,
         pokemon: null,
-        error: action.payload,
+        error: action.error,
       }
     default:
       throw new Error('Incorrect action type for PokemonInfo reducer.')
@@ -79,11 +79,11 @@ function PokemonInfo({pokemonName}) {
         dispatch({type: SET_TO_PENDING})
         const fetchedPokemon = await fetchPokemon(pokemonName)
 
-        dispatch({type: SET_TO_RESOLVED, payload: fetchedPokemon})
+        dispatch({type: SET_TO_RESOLVED, pokemon: fetchedPokemon})
       } catch (e) {
         console.error('Error while fetching pokemon. Error:', e)
 
-        dispatch({type: SET_TO_REJECTED, payload: e})
+        dispatch({type: SET_TO_REJECTED, error: e})
       }
     }
     fetchAndUpdatePokemon()
